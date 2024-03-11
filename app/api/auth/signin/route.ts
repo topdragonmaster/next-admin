@@ -11,6 +11,11 @@ const schema = Joi.object({
 });
 
 export async function POST(request: Request) {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
   await connectDB();
 
   const { email, password } = await request.json();

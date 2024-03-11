@@ -12,6 +12,12 @@ const schema = Joi.object({
 });
 
 export async function POST(request: Request) {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
   await ConnectDB();
 
   const { stockCode, station, amount, type, date } = await request.json();
@@ -30,7 +36,7 @@ export async function POST(request: Request) {
       stockCode, station, amount, type, date: new Date(date)
     });
     return NextResponse
-      .json({ success: true, createTransaction, message: "Transaction created successfully" });
+      .json({ success: true, createTransaction, message: "Transaction created successfully" }, { headers });
   } catch (error) {
     console.log("Error in register (server) => ", error);
     return NextResponse.json({
