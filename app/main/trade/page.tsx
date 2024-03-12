@@ -460,8 +460,8 @@ const Trade = () => {
                 <div className="relative z-20 bg-transparent dark:bg-form-input">
                   <select value={formData.account} onChange={handleChange} name="account" className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary">
                     {accounts.map(account =>
-                      <option key={account} value={account._id}>
-                        {`${account.name} of ${account.station.name}`}
+                      <option key={account?._id} value={account?._id}>
+                        {`${account?.name} of ${account?.station?.name}`}
                       </option>)}
                   </select>
                   <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">

@@ -14,8 +14,8 @@ import { stockCodes } from "@/const";
 
 const Report: React.FC = () => {
 
-  const [stationFilter, setStationFilter] = useState('default')
-  const [codeFilter, setCodeFilter] = useState('default')
+  const [stationFilter, setStationFilter] = useState('all')
+  const [codeFilter, setCodeFilter] = useState('all')
   const [fromDateFilter, setFromDateFilter] = useState('')
   const [toDateFilter, setToDateFilter] = useState('')
 
@@ -45,8 +45,8 @@ const Report: React.FC = () => {
   }
 
   const clearFilter = () => {
-    setStationFilter('default')
-    setCodeFilter('default')
+    setStationFilter('all')
+    setCodeFilter('all')
     setFromDateFilter('')
     setToDateFilter('')
   }
@@ -54,20 +54,20 @@ const Report: React.FC = () => {
   const filteredTrades = useMemo(() => {
     const filteredData = trades.filter(trade => {
       return (
-        (stationFilter === 'default' || trade?.account?.station?._id === stationFilter) &&
-        (codeFilter === 'default' || trade?.stockCode === codeFilter) &&
+        (stationFilter === 'all' || trade?.account?.station?._id === stationFilter) &&
+        (codeFilter === 'all' || trade?.stockCode === codeFilter) &&
         (fromDateFilter === '' || new Date(trade?.date).getTime() > new Date(fromDateFilter).getTime()) &&
         (toDateFilter === '' || new Date(trade?.date).getTime() < new Date(toDateFilter).getTime())
       );
     });
-    return filteredData
+    return filteredData.map(trade => ({ ...trade, station: trade.account.station }))
   }, [stationFilter, codeFilter, fromDateFilter, toDateFilter])
 
   const filteredTransactions = useMemo(() => {
     const filteredData = transactions.filter(transaction => {
       return (
-        (stationFilter === 'default' || transaction?.station?._id === stationFilter) &&
-        (codeFilter === 'default' || transaction?.stockCode === codeFilter) &&
+        (stationFilter === 'all' || transaction?.station?._id === stationFilter) &&
+        (codeFilter === 'all' || transaction?.stockCode === codeFilter) &&
         (fromDateFilter === '' || new Date(transaction?.date).getTime() >= new Date(fromDateFilter).getTime()) &&
         (toDateFilter === '' || new Date(transaction?.date).getTime() <= new Date(toDateFilter).getTime())
       );
@@ -76,6 +76,67 @@ const Report: React.FC = () => {
   }, [stationFilter, codeFilter, fromDateFilter, toDateFilter])
 
   console.log(filteredTrades, transactions)
+
+  const groupBy = (array, keyGetters) => {
+    return array.reduce((map, item) => {
+      const keys = keyGetters.map(keyGetter => keyGetter(item));
+      let currentMap = map;
+      keys.forEach((key, index) => {
+        if (!currentMap.has(key)) {
+          currentMap.set(key, index === keyGetters.length - 1 ? [] : new Map());
+        }
+        currentMap = currentMap.get(key);
+      });
+      currentMap.push(item);
+      return map;
+    }, new Map());
+  }
+
+  function getKeyGetters(station, stockCode) {
+    return [item => item.station.name, item => item.stockCode];
+  }
+
+  const grouped = groupBy([...filteredTransactions, ...filteredTrades], getKeyGetters(stationFilter, codeFilter))
+
+  const groupedArr = []
+
+  Array.from(grouped.values()).forEach((map) => {
+    Array.from(map.values()).forEach(items => {
+      const result = {
+        _id: items[0]._id,
+        stockCode: items[0].stockCode,
+        station: items[0]?.station?.name,
+        sell: 0,
+        buy: 0,
+        withdraw: 0,
+        deposit: 0,
+        total: 0,
+      }
+
+      items.forEach(item => {
+        switch (item.type) {
+          case 'buy':
+            result.buy += item.price * item.amount
+            result.total += item.price * item.amount
+            return
+          case 'sell':
+            result.sell += item.price * item.amount
+            result.total -= item.price * item.amount
+            return
+          case 'deposit':
+            result.deposit += item.amount
+            result.total += item.amount
+            return
+          case 'withdraw':
+            result.withdraw += item.amount
+            result.total -= item.amount
+            return
+        }
+      })
+      groupedArr.push(result)
+    })
+  })
+
   const buyAmount = filteredTrades.reduce((prev, cur) => {
     prev += cur.type === "buy" ? cur.amount * cur.price : 0
     return prev
@@ -108,7 +169,7 @@ const Report: React.FC = () => {
             </label>
             <div className="relative z-20 bg-transparent dark:bg-form-input">
               <select value={stationFilter} onChange={handleChange} name="station" className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary">
-                <option key={"default"} value={'default'}>Not Selected</option>
+                <option key={"all"} value={'all'}>All</option>
                 {stations.map(station =>
                   <option key={station._id} value={station._id}>
                     {station.name}
@@ -142,7 +203,7 @@ const Report: React.FC = () => {
             </label>
             <div className="relative z-20 bg-transparent dark:bg-form-input">
               <select value={codeFilter} onChange={handleChange} name="code" className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary">
-                <option key={"default"} value={'default'}>Not Selected</option>
+                <option key={"all"} value={'all'}>All</option>
                 {stockCodes.map(stockCode =>
                   <option key={stockCode} value={stockCode}>
                     {stockCode}
@@ -225,119 +286,29 @@ const Report: React.FC = () => {
                 <span className="font-medium">Stock</span>
               </div>
               <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Stations</span>
-              </div>
-              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Account</span>
-              </div>
-              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Price</span>
-              </div>
-              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Amount</span>
-              </div>
-              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Type</span>
-              </div>
-              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Date</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 md:p-6 xl:p-7.5">
-            <div className="flex flex-col gap-7">
-              {filteredTrades.length > 0 ? filteredTrades.map(({ stockCode, account, price, amount, type, date, _id }) => (
-                <div className="flex items-center justify-around gap-3" key={_id}>
-                  <div className="w-2/12 xl:w-3/12">
-                    <div className="flex items-center justify-center">
-                      <span className="font-medium xl:block">
-                        {stockCode}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="w-2/12 xl:w-3/12">
-                    <div className="flex items-center justify-center">
-                      <span className="font-medium xl:block">
-                        {account?.station?.name}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="w-2/12 xl:w-3/12">
-                    <div className="flex items-center justify-center">
-                      <span className="font-medium xl:block">
-                        {account?.name}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="w-2/12 xl:w-3/12">
-                    <div className="flex items-center justify-center">
-                      <span className="font-medium xl:block">
-                        {price}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="w-2/12 xl:w-3/12">
-                    <div className="flex items-center justify-center">
-                      <span className="font-medium xl:block">
-                        {amount}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="w-2/12 xl:w-3/12">
-                    <div className="flex items-center justify-center">
-                      <span className="font-medium xl:block">
-                        {type}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="w-2/12 xl:w-3/12">
-                    <div className="flex items-center justify-center">
-                      <span className="font-medium xl:block">
-                        {date.slice(0, 10)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )) : <div className="mx-auto"> No data</div>}
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-sm my-4 border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="p-4 md:p-6 xl:p-7.5">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-title-sm2 font-bold text-black dark:text-white">
-                  Deposit and Withdraw
-                </h2>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-b border-stroke px-4 pb-5 dark:border-strokedark md:px-6 xl:px-7.5">
-            <div className="flex items-center justify-around">
-              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Code</span>
-              </div>
-              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
                 <span className="font-medium">Station</span>
               </div>
               <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Amount</span>
+                <span className="font-medium">Buy</span>
               </div>
               <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Type</span>
+                <span className="font-medium">Sell</span>
               </div>
               <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
-                <span className="font-medium">Date</span>
+                <span className="font-medium">Deposit</span>
+              </div>
+              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
+                <span className="font-medium">Withdraw</span>
+              </div>
+              <div className="hidden w-2/12 text-center 2xsm:block md:w-1/12">
+                <span className="font-medium">Profit/Loss</span>
               </div>
             </div>
           </div>
 
           <div className="p-4 md:p-6 xl:p-7.5">
             <div className="flex flex-col gap-7">
-              {filteredTransactions.length > 0 ? filteredTransactions.map(({ stockCode, station, amount, type, date, _id }) => (
+              {groupedArr.length > 0 ? groupedArr.map(({ stockCode, station, buy, sell, withdraw, deposit, total, _id }) => (
                 <div className="flex items-center justify-around gap-3" key={_id}>
                   <div className="w-2/12 xl:w-3/12">
                     <div className="flex items-center justify-center">
@@ -349,31 +320,46 @@ const Report: React.FC = () => {
                   <div className="w-2/12 xl:w-3/12">
                     <div className="flex items-center justify-center">
                       <span className="font-medium xl:block">
-                        {station?.name}
+                        {station}
                       </span>
                     </div>
                   </div>
                   <div className="w-2/12 xl:w-3/12">
                     <div className="flex items-center justify-center">
                       <span className="font-medium xl:block">
-                        {amount}
+                        {buy}
                       </span>
                     </div>
                   </div>
                   <div className="w-2/12 xl:w-3/12">
                     <div className="flex items-center justify-center">
                       <span className="font-medium xl:block">
-                        {type}
+                        {sell}
                       </span>
                     </div>
                   </div>
                   <div className="w-2/12 xl:w-3/12">
                     <div className="flex items-center justify-center">
                       <span className="font-medium xl:block">
-                        {date.slice(0, 10)}
+                        {deposit}
                       </span>
                     </div>
                   </div>
+                  <div className="w-2/12 xl:w-3/12">
+                    <div className="flex items-center justify-center">
+                      <span className="font-medium xl:block">
+                        {withdraw}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-2/12 xl:w-3/12">
+                    <div className="flex items-center justify-center">
+                      <span className="font-medium xl:block">
+                        {total}
+                      </span>
+                    </div>
+                  </div>
+
                 </div>
               )) : <div className="mx-auto"> No data</div>}
             </div>
@@ -385,7 +371,7 @@ const Report: React.FC = () => {
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-title-sm2 font-bold text-black dark:text-white">
-                  Report
+                  Total
                 </h2>
               </div>
             </div>
@@ -435,7 +421,7 @@ const Report: React.FC = () => {
             <div className="w-full px-4 sm:w-1/2 xl:w-3/12">
               <div className="mb-10">
                 <h4 className="mb-4 text-xl font-semibold text-black dark:text-white md:text-2xl">
-                  Total
+                  Profit/Loss
                 </h4>
                 <p>
                   {`$${buyAmount - sellAmount + depositAmount - withdrawAmount}`}

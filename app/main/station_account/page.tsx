@@ -28,6 +28,7 @@ const Station_Account = () => {
     station: stations[0]?._id
   })
 
+  console.log(stations, accounts)
   const handleStationDelete = async (_id) => {
     const data = await deleteStation(_id)
     if (data.success) {
@@ -244,7 +245,7 @@ const Station_Account = () => {
                     <div className="w-2/12 xl:w-3/12">
                       <div className="flex items-center gap-4">
                         <span className="font-medium xl:block">
-                          {station.name}
+                          {station?.name}
                         </span>
                       </div>
                     </div>
@@ -406,7 +407,7 @@ const Station_Account = () => {
                 Station
               </label>
               <select value={formData.station} onChange={handleChange} name="station" className="w-full rounded-sm border border-stroke bg-white py-3 px-4.5 focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-boxdark dark:focus:border-primary">
-                {stations.map(station => <option key={station._id} value={station._id}>{station.name}</option>)}
+                {stations.map(station => <option key={station?._id} value={station?._id}>{station?.name}</option>)}
               </select>
             </div>
             <div className="mb-5">
