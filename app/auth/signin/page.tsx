@@ -9,6 +9,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from 'next/navigation'
 import Loader from "@/components/common/Loader";
 
+export const dynamic = 'force-dynamic';
 
 const SignIn: React.FC = () => {
   const dispatch = useDispatch();

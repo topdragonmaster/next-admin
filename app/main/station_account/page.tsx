@@ -11,6 +11,7 @@ import { deleteAccount, createAccount, getAccount } from "@/services/account";
 
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { toast } from "react-toastify";
+export const dynamic = 'force-dynamic';
 
 const Station_Account = () => {
   

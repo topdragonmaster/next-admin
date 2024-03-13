@@ -11,6 +11,8 @@ import {
   usePagination,
 } from "react-table";
 import { stockCodes } from "@/const";
+export const dynamic = 'force-dynamic';
+
 
 const Report: React.FC = () => {
 

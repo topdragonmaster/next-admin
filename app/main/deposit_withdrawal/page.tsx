@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -15,6 +16,8 @@ import { toast } from "react-toastify";
 // import { stockCodes } from "@/const";
 import { columns } from "./const";
 import DropdownDefault from "@/components/Dropdowns/DropdownDefault";
+
+export const dynamic = 'force-dynamic';
 
 const Transaction = () => {
 

@@ -5,6 +5,8 @@ import Joi from "joi";
 import { compare } from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+export const dynamic = 'force-dynamic';
+
 const schema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),

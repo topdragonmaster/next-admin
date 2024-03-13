@@ -3,6 +3,7 @@ import ConnectDB from "../../../../DB/connectDB";
 import User from "../../../../models/User";
 import Joi from "joi";
 import { hash } from "bcryptjs";
+export const dynamic = 'force-dynamic';
 
 const schema = Joi.object({
     email: Joi.string().email().required(),

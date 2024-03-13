@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+export const dynamic = 'force-dynamic';
 
 const SignUp: React.FC = () => {
   return (

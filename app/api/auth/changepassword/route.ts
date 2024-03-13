@@ -4,6 +4,8 @@ import User from "../../../../models/User";
 import Joi from "joi";
 import { hash, compare } from "bcryptjs";
 
+export const dynamic = 'force-dynamic';
+
 const schema = Joi.object({
   _id: Joi.string().required(),
 });

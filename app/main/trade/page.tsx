@@ -15,6 +15,8 @@ import { toast } from "react-toastify";
 // import { stockCodes } from "@/const";
 import { columns } from "./const";
 import DropdownDefault from "@/components/Dropdowns/DropdownDefault";
+export const dynamic = 'force-dynamic';
+
 
 const Trade = () => {
 
