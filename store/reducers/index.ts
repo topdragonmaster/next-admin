@@ -4,6 +4,7 @@ import stationReducer from './stationReducer';
 import accountReducer from './accountReducer';
 import tradeReducer from './tradeReducer';
 import transactionReducer from './transactionReducer';
+import stockCodeReducer from './stockCodeReducer';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   account: accountReducer,
   trade:tradeReducer,
   transaction: transactionReducer,
+  stockCode: stockCodeReducer,
 });
 
 export default rootReducer;

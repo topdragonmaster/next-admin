@@ -2,20 +2,18 @@ import { NextResponse } from 'next/server'
 import ConnectDB from "../../../../DB/connectDB";
 import User from "../../../../models/User";
 import Joi from "joi";
-import { hash } from "bcryptjs";
+import { hash, compare } from "bcryptjs";
 
 const schema = Joi.object({
-  id: Joi.string().required(),
-  password: Joi.string().min(5).required(),
+  _id: Joi.string().required(),
 });
 
 export async function POST(request: Request) {
   await ConnectDB();
 
-  const { id, password } = await request.json();
+  const { _id, email, username, oldPassword, newPassword } = await request.json();
   const { error } = schema.validate({
-    id,
-    password,
+    _id,
   });
 
   if (error)
@@ -25,9 +23,28 @@ export async function POST(request: Request) {
     });
 
   try {
-    const hashedPassword = await hash(password, 12);
-    const updatedUser = await User.findByIdAndUpdate(id, {
-      password: hashedPassword,
+    const checkUser = await User.findOne({ _id });
+
+    if (!checkUser)
+      return NextResponse
+        .json({ success: false, message: "Account not Found" });
+
+    if (newPassword || oldPassword) {
+      const isMatch = await compare(oldPassword, checkUser.password);
+      if (!isMatch)
+        return NextResponse
+          .json({ success: false, message: "Incorrect old Password" });
+    }
+
+    const hashedPassword = await hash(newPassword, 12)
+    const body = newPassword ?
+      {
+        email, username,
+        password: hashedPassword,
+      } : { email, username }
+
+    const updatedUser = await User.findByIdAndUpdate(_id, {
+      ...body
     }, { new: true });
 
     if (!updatedUser) {

@@ -12,7 +12,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { deleteTrade, createTrade, getTrade, updateTrade } from "@/services/trade";
 import { deleteTrade as deleteTradeAction } from "@/store/actions/tradeAction";
 import { toast } from "react-toastify";
-import { stockCodes } from "@/const";
+// import { stockCodes } from "@/const";
 import { columns } from "./const";
 import DropdownDefault from "@/components/Dropdowns/DropdownDefault";
 
@@ -24,7 +24,9 @@ const Trade = () => {
   const { stations } = useSelector((state: any) => state.station)
   const { accounts } = useSelector((state: any) => state.account)
   const { trades } = useSelector((state: any) => state.trade)
-  console.log(trades, accounts)
+  const { stockCodes } = useSelector((state: any) => state.stockCode)
+
+  console.log(trades, accounts, stockCodes)
 
   const tableData = useMemo(() => trades?.map(trade => ({
     _id: trade._id,
@@ -43,7 +45,7 @@ const Trade = () => {
 
   const [formData, setFormData] = useState({
     _id: null,
-    stockCode: stockCodes[0],
+    stockCode: stockCodes[0].name,
     account: accounts[0]?._id,
     price: 0,
     amount: 0,
@@ -397,7 +399,7 @@ const Trade = () => {
                   </label>
                   <div className="relative z-20 bg-transparent dark:bg-form-input">
                     <select value={formData.stockCode} onChange={handleChange} name="stockCode" className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary">
-                      {stockCodes.map(code => <option key={code} value={code}>{code}</option>)}
+                      {stockCodes.map(code => <option key={code._id} value={code.name}>{code.name}</option>)}
                     </select>
                     <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
                       <svg

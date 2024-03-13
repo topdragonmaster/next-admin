@@ -100,7 +100,7 @@ const Report: React.FC = () => {
 
   const groupedArr = []
 
-  Array.from(grouped.values()).forEach((map) => {
+  Array.from(grouped.values()).forEach((map: Map<string, Array<any>>) => {
     Array.from(map.values()).forEach(items => {
       const result = {
         _id: items[0]._id,
@@ -274,7 +274,7 @@ const Report: React.FC = () => {
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-title-sm2 font-bold text-black dark:text-white">
-                  Trades
+                  Reports
                 </h2>
               </div>
             </div>

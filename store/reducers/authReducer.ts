@@ -1,6 +1,7 @@
-import { LOGIN_SUCCESS, LOGOUT } from '../actions/types';
+import { LOGIN_SUCCESS, UPDATEAUTH, LOGOUT } from '../actions/types';
 
 const initialState = {
+  _id: null,
   isAuthenticated: false,
   username: null,
   email: null,
@@ -11,6 +12,16 @@ const authReducer = (state = initialState, action) => {
     case LOGIN_SUCCESS:
       return {
         ...state,
+        _id: action.payload._id,
+        isAuthenticated: true,
+        username: action.payload.username,
+        email: action.payload.email,
+      };
+
+    case UPDATEAUTH:
+      return {
+        ...state,
+        _id: action.payload._id,
         isAuthenticated: true,
         username: action.payload.username,
         email: action.payload.email,
@@ -18,6 +29,7 @@ const authReducer = (state = initialState, action) => {
     case LOGOUT:
       return {
         ...state,
+        _id: null,
         isAuthenticated: false,
         username: null,
         email: null,

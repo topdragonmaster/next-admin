@@ -4,6 +4,7 @@ import { getStation } from "@/services/station";
 import { getAccount } from "@/services/account";
 import { getTrade } from "@/services/trade";
 import { getTransaction } from "@/services/transaction";
+import { getStockCode } from "@/services/stockCode";
 
 import { ApexOptions } from 'apexcharts';
 import dynamic from "next/dynamic";
@@ -28,6 +29,7 @@ const CRM: React.FC = () => {
     getAccount(dispatch);
     getTrade(dispatch);
     getTransaction(dispatch);
+    getStockCode(dispatch)
   }, [])
 
   const { stations } = useSelector((state: any) => state.station)

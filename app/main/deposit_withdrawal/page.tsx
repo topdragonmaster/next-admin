@@ -12,7 +12,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { deleteTransaction, createTransaction, getTransaction, updateTransaction } from "@/services/transaction";
 import { deleteTransaction as deleteTransactionAction } from "@/store/actions/transactionAction";
 import { toast } from "react-toastify";
-import { stockCodes } from "@/const";
+// import { stockCodes } from "@/const";
 import { columns } from "./const";
 import DropdownDefault from "@/components/Dropdowns/DropdownDefault";
 
@@ -24,6 +24,8 @@ const Transaction = () => {
   const { stations } = useSelector((state: any) => state.station)
   const { accounts } = useSelector((state: any) => state.account)
   const { transactions } = useSelector((state: any) => state.transaction)
+  const { stockCodes } = useSelector((state: any) => state.stockCode)
+
 
   const tableData = useMemo(() => transactions?.map(transaction => ({
     _id: transaction._id,
@@ -39,7 +41,7 @@ const Transaction = () => {
 
   const [formData, setFormData] = useState({
     _id: null,
-    stockCode: stockCodes[0],
+    stockCode: stockCodes[0]?.name,
     station: stations[0]?._id,
     amount: 0,
     type: 'withdraw',
@@ -371,7 +373,7 @@ const Transaction = () => {
                   </label>
                   <div className="relative z-20 bg-transparent dark:bg-form-input">
                     <select value={formData.stockCode} onChange={handleChange} name="stockCode" className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary">
-                      {stockCodes.map(code => <option key={code} value={code}>{code}</option>)}
+                      {stockCodes.map(code => <option key={code._id} value={code.name}>{code.name}</option>)}
                     </select>
                     <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
                       <svg
@@ -434,8 +436,8 @@ const Transaction = () => {
                 <div className="relative z-20 bg-transparent dark:bg-form-input">
                   <select value={formData.station} onChange={handleChange} name="station" className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary">
                     {stations.map(station =>
-                      <option key={station._id} value={station._id}>
-                        {station.name}
+                      <option key={station?._id} value={station?._id}>
+                        {station?.name}
                       </option>)}
                   </select>
                   <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
